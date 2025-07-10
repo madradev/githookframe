@@ -1,0 +1,30 @@
+#!/bin/bash
+
+FRAMEWORK_HOOKLETS_DIR="$(cd "$(dirname "$0")" && pwd)/hooklets/"
+
+# Any hooklets run here will be executed BEFORE the local __hook hook.
+# Example global hooklet 
+# (note that the "|| exit 1" part is important to ensure that the script exits if the hooklet fails)
+# "$FRAMEWORK_HOOKLETS_DIR/example.sh" || exit 1
+
+
+### Run local __hook hook if it exists:
+
+# Detect local hook path
+LOCAL_HOOK="$(git rev-parse --show-toplevel)/.git/hooks/__hook"
+
+# Check if the local hook exists and is executable
+if [ -x "$LOCAL_HOOK" ]; then
+    echo "Running local __hook hook"
+    "$LOCAL_HOOK" "$@"
+    local_status=$?
+    if [ $local_status -ne 0 ]; then
+        exit $local_status
+    fi
+fi
+
+# Any hooklets run here will be executed AFTER the local __hook hook.
+# Example global hooklet:
+# "$FRAMEWORK_HOOKLETS_DIR/example.sh"
+
+exit 0
